@@ -78,15 +78,16 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
-        self.batchSize = 50
-        self.num_neurons_hidden_layer = 55
+        
+        self.batchSize = 25
+        self.hiddenLayerNeurons = 100
 
         # initialize weight and bias vectors
-        self.weight1 = nn.Parameter(1, self.num_neurons_hidden_layer) 
-        self.bias1 = nn.Parameter(1, self.num_neurons_hidden_layer)
+        self.weight1 = nn.Parameter(1, self.hiddenLayerNeurons) 
+        self.bias1 = nn.Parameter(1, self.hiddenLayerNeurons)
 
         # Output layer
-        self.weightOut = nn.Parameter(self.num_neurons_hidden_layer, 1)
+        self.weightOut = nn.Parameter(self.hiddenLayerNeurons, 1)
         self.biasOut = nn.Parameter(1, 1)
 
 
@@ -100,16 +101,17 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
-        # layer 1 - compute models predictions for y
-        lin_trans_1 = nn.Linear(x, self.weight1)
-        predicted_y = nn.AddBias(lin_trans_1, self.bias1)
-        layer_1 = nn.ReLU(predicted_y)
 
-        # Output layer: no relu needed
-        lin_trans_2 = nn.Linear(layer_1, self.weightOut)
+        # compute y predictions
+        lineartrans1 = nn.Linear(x, self.weight1)
+        y_predicted = nn.AddBias(lineartrans1, self.bias1)
+        layer1 = nn.ReLU(y_predicted)
+
+        # Output layer
+        lineartrans2 = nn.Linear(layer1, self.weightOut)
         
         # compute and return predicted output of layer
-        return nn.AddBias(lin_trans_2, self.biasOut)
+        return nn.AddBias(lineartrans2, self.biasOut)
 
 
     def get_loss(self, x, y):
@@ -132,25 +134,26 @@ class RegressionModel(object):
         """
         "*** YOUR CODE HERE ***"
 
-        adjusted_rate = -0.2
+        adjustRate = -0.2
         while True:
 
-            # iterate through each batch
-            for row_vect, label in dataset.iterate_once(self.batchSize):
-                loss = self.get_loss(row_vect, label)
-                parameters = [self.w_1, self.output_w, self.b_1, self.output_b]
-                grad_1, grad_2, grad_3, grad_4 = nn.gradients(parameters, loss) 
-                learning_rate = min(-0.01, adjusted_rate)
+            # iterate through batches
+            for rowVector, label in dataset.iterate_once(self.batchSize):
+                loss = self.get_loss(rowVector, label)
+                params = [self.weight1, self.weightOut, self.bias1, self.biasOut]
+                grad1, grad2, grad3, grad4 = nn.gradients(params, loss)
+                learningRate = min(-0.01, adjustRate)
 
-                # update the weights and bias
-                self.weight1.update(learning_rate, grad_1)
-                self.weightOut.update(learning_rate, grad_2)
-                self.bias1.update(learning_rate, grad_3)
-                self.biasOut.update(learning_rate, grad_4)
+                # update weights and biases
+                self.weight1.update(learningRate, grad1)
+                self.weightOut.update(learningRate, grad2)
+                self.bias1.update(learningRate, grad3)
+                self.biasOut.update(learningRate, grad4)
 
-            adjusted_rate += .02
+            # check loss
+            adjustRate += .02
             loss = self.get_loss(nn.Constant(dataset.x), nn.Constant(dataset.y))
-            if nn.as_scalar(loss) < 0.01:
+            if nn.as_scalar(loss) < 0.02:
                 return
 
 class DigitClassificationModel(object):
