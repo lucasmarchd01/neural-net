@@ -27,6 +27,9 @@ class PerceptronModel(object):
         Returns: a node containing a single number (the score)
         """
         "*** YOUR CODE HERE ***"
+        # retrun dot products of weight vector and given input
+        return nn.DotProduct(self.w, x)
+
 
     def get_prediction(self, x):
         """
@@ -35,12 +38,33 @@ class PerceptronModel(object):
         Returns: 1 or -1
         """
         "*** YOUR CODE HERE ***"
+        # return 1 if the dot product is non-negative, otherwise return -1
+        if nn.as_scalar(self.run(x)) >= 0:
+            return 1
+        else:
+            return -1
+
 
     def train(self, dataset):
         """
         Train the perceptron until convergence.
         """
         "*** YOUR CODE HERE ***"
+
+        no_mistakes = False
+        while not no_mistakes:
+            no_mistakes = True
+
+            for direction, y_true in dataset.iterate_once(1): 
+                # get neural network prediction
+                y_pred = self.get_prediction(direction)
+                multiplier = nn.as_scalar(y_true)
+
+                if y_pred != multiplier:
+                    # update misclassified examples if 
+                    self.w.update(multiplier,direction)
+                    no_mistakes = False
+
 
 class RegressionModel(object):
     """
@@ -51,6 +75,18 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        self.batch_size = 25
+        self.num_neurons_hidden_layer = 55
+
+        #  layer 1
+        # input is size (batch_size x 1) so W must be size (1 x #nodes_hidden_layer)
+        self.w_1 = nn.Parameter(1, self.num_neurons_hidden_layer)  # weight vector 1
+        self.b_1 = nn.Parameter(1, self.num_neurons_hidden_layer)  # bias vector 1
+
+        # output layer
+        self.output_w = nn.Parameter(self.num_neurons_hidden_layer, 1)
+        self.output_b = nn.Parameter(1, 1)
+
 
     def run(self, x):
         """
@@ -62,6 +98,16 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
+        #  layer 1
+        # compute models predictions for y
+        lin_trans = nn.Linear(x, self.w_1)
+        predicted_y = nn.AddBias(lin_trans, self.b_1)
+        layer_1 = nn.ReLU(predicted_y)
+
+        # Output layer: no relu needed
+        trans_2 = nn.Linear(layer_1, self.output_w)
+        return nn.AddBias(trans_2, self.output_b)
+
 
     def get_loss(self, x, y):
         """
@@ -74,12 +120,34 @@ class RegressionModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        return nn.SquareLoss(self.run(x), y)
+
 
     def train(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+
+        adjusted_rate = -0.2
+        while True:
+
+            for row_vect, label in dataset.iterate_once(self.batch_size):
+                loss = self.get_loss(row_vect, label)
+                params = [self.w_1, self.output_w, self.b_1, self.output_b]
+                gradients = nn.gradients(params, loss) # (loss, params)
+                learning_rate = min(-0.01, adjusted_rate)
+
+                # updates
+                self.w_1.update(learning_rate, gradients[0])
+                self.output_w.update(learning_rate, gradients[1])
+                self.b_1.update(learning_rate, gradients[2])
+                self.output_b.update(learning_rate, gradients[3])
+
+            adjusted_rate += .02
+            loss = self.get_loss(nn.Constant(dataset.x), nn.Constant(dataset.y))
+            if nn.as_scalar(loss) < 0.01:
+                return
 
 class DigitClassificationModel(object):
     """
@@ -98,6 +166,25 @@ class DigitClassificationModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        self.batch_size = 25             # 10
+        self.hidden_layer_size = 350     # 350
+        self.num_labels = 10
+
+        # hidden layer 1
+        self.w_1 = nn.Parameter(784, self.hidden_layer_size)
+        self.b_1 = nn.Parameter(1, self.hidden_layer_size)
+
+        # hidden layer 2
+        self.w_2 = nn.Parameter(self.hidden_layer_size, self.hidden_layer_size)
+        self.b_2 = nn.Parameter(1, self.hidden_layer_size)
+
+        # hidden layer 3
+        self.w_3 = nn.Parameter(self.hidden_layer_size, self.hidden_layer_size)
+        self.b_3 = nn.Parameter(1, self.hidden_layer_size)
+
+        # output vector
+        self.output_wt = nn.Parameter(self.hidden_layer_size, self.num_labels)
+        self.output_bias = nn.Parameter(1, self.num_labels)
 
     def run(self, x):
         """
@@ -114,6 +201,24 @@ class DigitClassificationModel(object):
                 (also called logits)
         """
         "*** YOUR CODE HERE ***"
+        trans_1 = nn.Linear(x, self.w_1)
+        trans_bias_1 = nn.AddBias(trans_1, self.b_1)
+        layer_1 = nn.ReLU(trans_bias_1)
+
+        # hidden layer 2
+        trans_2 = nn.Linear(layer_1, self.w_2)
+        trans_bias_2 = nn.AddBias(trans_2, self.b_2)
+        layer_2 = nn.ReLU(trans_bias_2)
+
+        # hidden layer 3
+        trans_3 = nn.Linear(layer_2, self.w_3)
+        trans_bias_3 = nn.AddBias(trans_3, self.b_3)
+        layer_3 = nn.ReLU(trans_bias_3)
+
+        # output vector (no relu)
+        last_trans = nn.Linear(layer_3, self.output_wt)
+        return nn.AddBias(last_trans, self.output_bias)
+
 
     def get_loss(self, x, y):
         """
@@ -129,10 +234,37 @@ class DigitClassificationModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        y_hats = self.run(x)
+        return nn.SoftmaxLoss(y_hats, y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        adjusted_rate = -0.12
+        done_training = 0
+
+        while done_training < 0.98:
+
+            for row_vect, y in dataset.iterate_once(self.batch_size):
+                loss = self.get_loss(row_vect, y)
+                params = ([self.w_1, self.w_2, self.w_3, self.output_wt,
+                           self.b_1, self.b_2, self.b_3, self.output_bias])
+                gradients = nn.gradients(params, loss) # (loss, params)
+                learning_rate = min(-0.005, adjusted_rate)
+
+                # updates
+                self.w_1.update(learning_rate, gradients[0])
+                self.w_2.update(learning_rate, gradients[1])
+                self.w_3.update(learning_rate, gradients[2])
+                self.output_wt.update(learning_rate, gradients[3])
+                self.b_1.update(learning_rate, gradients[4])
+                self.b_2.update(learning_rate, gradients[5])
+                self.b_3.update(learning_rate, gradients[6])
+                self.output_bias.update(learning_rate, gradients[7])
+
+            adjusted_rate += 0.05
+            # check for 98 % accuracy after each epoch, not after each batch
+            done_training = dataset.get_validation_accuracy()
 
