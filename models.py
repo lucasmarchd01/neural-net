@@ -55,13 +55,16 @@ class PerceptronModel(object):
         while not no_mistakes:
             no_mistakes = True
 
-            for direction, y_true in dataset.iterate_once(1): 
+            # iterate through batches
+            for direction, y_true in dataset.iterate_once(1):
+
                 # get neural network prediction
                 y_pred = self.get_prediction(direction)
+                # convert node to floating point number
                 multiplier = nn.as_scalar(y_true)
 
                 if y_pred != multiplier:
-                    # update misclassified examples if 
+                    # update misclassified examples if not the same
                     self.w.update(multiplier,direction)
                     no_mistakes = False
 
@@ -98,15 +101,16 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
-        #  layer 1
-        # compute models predictions for y
-        lin_trans = nn.Linear(x, self.w_1)
-        predicted_y = nn.AddBias(lin_trans, self.b_1)
+        # layer 1 - compute models predictions for y
+        lin_trans_1 = nn.Linear(x, self.weight_1)
+        predicted_y = nn.AddBias(lin_trans_1, self.bias_1)
         layer_1 = nn.ReLU(predicted_y)
 
         # Output layer: no relu needed
-        trans_2 = nn.Linear(layer_1, self.output_w)
-        return nn.AddBias(trans_2, self.output_b)
+        lin_trans_2 = nn.Linear(layer_1, self.output_w)
+        
+        # compute and return predicted output of layer
+        return nn.AddBias(lin_trans_2, self.output_b)
 
 
     def get_loss(self, x, y):
