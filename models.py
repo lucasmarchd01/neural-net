@@ -78,8 +78,8 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
-        self.batchSize = 50
-        self.hiddenLayerNeurons = 55
+        self.batchSize = 25
+        self.hiddenLayerNeurons = 100
 
         # initialize weight and bias vectors
         self.weight1 = nn.Parameter(1, self.hiddenLayerNeurons) 
@@ -132,25 +132,26 @@ class RegressionModel(object):
         """
         "*** YOUR CODE HERE ***"
 
-        adjusted_rate = -0.2
+        adjustRate = -0.2
         while True:
 
-            # iterate through each batch
-            for row_vect, label in dataset.iterate_once(self.batch_size):
-                loss = self.get_loss(row_vect, label)
-                params = [self.w_1, self.output_w, self.b_1, self.output_b]
-                grad_1, grad_2, grad_3, grad_4 = nn.gradients(params, loss) 
-                learning_rate = min(-0.01, adjusted_rate)
+            # iterate through batched
+            for rowVector, label in dataset.iterate_once(self.batchSize):
+                loss = self.get_loss(rowVector, label)
+                params = [self.weight1, self.weightOut, self.bias1, self.biasOut]
+                grad1, grad2, grad3, grad4 = nn.gradients(params, loss)
+                learningRate = min(-0.01, adjustRate)
 
-                # updates
-                self.w_1.update(learning_rate, grad_1)
-                self.output_w.update(learning_rate, grad_2)
-                self.b_1.update(learning_rate, grad_3)
-                self.output_b.update(learning_rate, grad_4)
+                # update weights and biases
+                self.weight1.update(learningRate, grad1)
+                self.weightOut.update(learningRate, grad2)
+                self.bias1.update(learningRate, grad3)
+                self.biasOut.update(learningRate, grad4)
 
-            adjusted_rate += .02
+            # check loss
+            adjustRate += .02
             loss = self.get_loss(nn.Constant(dataset.x), nn.Constant(dataset.y))
-            if nn.as_scalar(loss) < 0.01:
+            if nn.as_scalar(loss) < 0.02:
                 return
 
 class DigitClassificationModel(object):
