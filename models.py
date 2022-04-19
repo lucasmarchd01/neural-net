@@ -100,16 +100,16 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
-        # layer 1 - compute models predictions for y
-        lin_trans_1 = nn.Linear(x, self.weight_1)
-        predicted_y = nn.AddBias(lin_trans_1, self.bias_1)
-        layer_1 = nn.ReLU(predicted_y)
+        # compute y predictions
+        lineartrans1 = nn.Linear(x, self.weight1)
+        y_predicted = nn.AddBias(lineartrans1, self.bias1)
+        layer1 = nn.ReLU(y_predicted)
 
-        # Output layer: no relu needed
-        lin_trans_2 = nn.Linear(layer_1, self.output_w)
+        # Output layer
+        lineartrans2 = nn.Linear(layer1, self.weightOut)
         
         # compute and return predicted output of layer
-        return nn.AddBias(lin_trans_2, self.output_b)
+        return nn.AddBias(lineartrans2, self.biasOut)
 
 
     def get_loss(self, x, y):
