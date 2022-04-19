@@ -78,7 +78,7 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
-        self.batch_size = 25
+        self.batch_size = 50
         self.num_neurons_hidden_layer = 55
 
         #  layer 1
@@ -136,17 +136,18 @@ class RegressionModel(object):
         adjusted_rate = -0.2
         while True:
 
+            # iterate through each batch
             for row_vect, label in dataset.iterate_once(self.batch_size):
                 loss = self.get_loss(row_vect, label)
                 params = [self.w_1, self.output_w, self.b_1, self.output_b]
-                gradients = nn.gradients(params, loss) # (loss, params)
+                grad_1, grad_2, grad_3, grad_4 = nn.gradients(params, loss) 
                 learning_rate = min(-0.01, adjusted_rate)
 
                 # updates
-                self.w_1.update(learning_rate, gradients[0])
-                self.output_w.update(learning_rate, gradients[1])
-                self.b_1.update(learning_rate, gradients[2])
-                self.output_b.update(learning_rate, gradients[3])
+                self.w_1.update(learning_rate, grad_1)
+                self.output_w.update(learning_rate, grad_2)
+                self.b_1.update(learning_rate, grad_3)
+                self.output_b.update(learning_rate, grad_4)
 
             adjusted_rate += .02
             loss = self.get_loss(nn.Constant(dataset.x), nn.Constant(dataset.y))
