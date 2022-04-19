@@ -78,8 +78,8 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
-        self.batchSize = 50
-        self.hiddenLayerNeurons = 55
+        self.batchSize = 25
+        self.hiddenLayerNeurons = 100
 
         # initialize weight and bias vectors
         self.weight1 = nn.Parameter(1, self.hiddenLayerNeurons) 
@@ -140,7 +140,7 @@ class RegressionModel(object):
                 loss = self.get_loss(rowVector, label)
                 params = [self.weight1, self.weightOut, self.bias1, self.biasOut]
                 grad1, grad2, grad3, grad4 = nn.gradients(params, loss)
-                learningRate = min(-0.01, adjusted_rate)
+                learningRate = min(-0.01, adjustRate)
 
                 # update weights and biases
                 self.weight1.update(learningRate, grad1)
