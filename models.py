@@ -81,14 +81,13 @@ class RegressionModel(object):
         self.batch_size = 50
         self.num_neurons_hidden_layer = 55
 
-        #  layer 1
-        # input is size (batch_size x 1) so W must be size (1 x #nodes_hidden_layer)
-        self.w_1 = nn.Parameter(1, self.num_neurons_hidden_layer)  # weight vector 1
-        self.b_1 = nn.Parameter(1, self.num_neurons_hidden_layer)  # bias vector 1
+        # initialize weight and bias vectors
+        self.weight1 = nn.Parameter(1, self.num_neurons_hidden_layer) 
+        self.bias1 = nn.Parameter(1, self.num_neurons_hidden_layer)
 
-        # output layer
-        self.output_w = nn.Parameter(self.num_neurons_hidden_layer, 1)
-        self.output_b = nn.Parameter(1, 1)
+        # Output layer
+        self.weightOut = nn.Parameter(self.num_neurons_hidden_layer, 1)
+        self.biasOut = nn.Parameter(1, 1)
 
 
     def run(self, x):
