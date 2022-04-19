@@ -135,7 +135,7 @@ class RegressionModel(object):
         adjustRate = -0.2
         while True:
 
-            # iterate through batched
+            # iterate through batches
             for rowVector, label in dataset.iterate_once(self.batchSize):
                 loss = self.get_loss(rowVector, label)
                 params = [self.weight1, self.weightOut, self.bias1, self.biasOut]
