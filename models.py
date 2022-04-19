@@ -78,7 +78,7 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
-        self.batchsize = 50
+        self.batchSize = 50
         self.hiddenLayerNeurons = 55
 
         # initialize weight and bias vectors
