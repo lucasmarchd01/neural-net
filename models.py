@@ -78,15 +78,15 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
-        self.batch_size = 50
-        self.num_neurons_hidden_layer = 55
+        self.batchSize = 50
+        self.hiddenLayerNeurons = 55
 
         # initialize weight and bias vectors
-        self.weight1 = nn.Parameter(1, self.num_neurons_hidden_layer) 
-        self.bias1 = nn.Parameter(1, self.num_neurons_hidden_layer)
+        self.weight1 = nn.Parameter(1, self.hiddenLayerNeurons) 
+        self.bias1 = nn.Parameter(1, self.hiddenLayerNeurons)
 
         # Output layer
-        self.weightOut = nn.Parameter(self.num_neurons_hidden_layer, 1)
+        self.weightOut = nn.Parameter(self.hiddenLayerNeurons, 1)
         self.biasOut = nn.Parameter(1, 1)
 
 
