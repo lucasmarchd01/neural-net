@@ -79,7 +79,6 @@ class RegressionModel(object):
     """
     def __init__(self):
         # Initialize your model parameters here
-        "*** YOUR CODE HERE ***"
         
         # initialize LR and batch size
         self.learningRate = .008
@@ -140,12 +139,14 @@ class RegressionModel(object):
         """
         "*** YOUR CODE HERE ***"
         
-        parameters = [self.weight1, self.bias1, self.weight2, self.bias2, self.weightOut, self.biasOut]
+        parameters = [self.weight1, self.weight2, self.weightOut, self.bias1, self.bias2, self.biasOut]
         
         while True:
+
             # iterate though the batches
             for x, y in dataset.iterate_once(self.batchSize):
-                # get softmax loss
+                
+                # get square loss
                 loss = self.get_loss(x, y)
                 # get gradients of the loss with respect to the paraneters
                 gradients = nn.gradients(parameters, loss)
